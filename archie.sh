@@ -113,7 +113,6 @@ remove_packages() {
 gnome_tweaks() {
     local ruser_uid=$(id -u ${real_user})
     echo "Set display scaling to 100%"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface scaling-factor 0
     sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface text-scaling-factor 1.0
     echo "Reduce volume step scale to 2"
     sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.settings-daemon.plugins.media-keys volume-step 2
