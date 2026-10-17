@@ -71,7 +71,7 @@ install_packages () {
         echo -e "${LIGHTGREEN}[install_packages] sucesfully installed $1${NOCOLOR}"
     else
         echo
-        echo_error "failed to install '$1' with pacman. Are they installed?" $?
+        echo_error "failed to install '$1' with pacman. Do the packages exist?" $?
     fi
 }
 
@@ -143,7 +143,7 @@ echo -e "${LIGHTCYAN}                _     _
 ${LIGHTPURPLE}| (_| | | | (__| | | | |  __/
  \__,_|_|  \___|_| |_|_|\___|${NOCOLOR}"
 echo
-echo "Welcome to ReduxFlake's Archie script :3"
+echo "Welcome to ReduxFlakes's Archie script :3"
 echo
 
 # startChecks
