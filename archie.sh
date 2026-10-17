@@ -165,9 +165,9 @@ echo -e "${LIGHTBLUE}Features${NOCOLOR}"
 echo "  - install required packages"
 echo "  - debloat GNOME, tweak it, and install extensions"
 echo "  - set up preferred shell and configure it"
-# echo -e "${LIGHTBLUE}Software${NOCOLOR}"
-# echo "  - VM (libvirt and qemu)"
-# echo "  - Containers (podman, toolbox, and distrobox)"
+echo -e "${LIGHTBLUE}Software${NOCOLOR}"
+echo "  - Flatpak support and applications"
+# echo "  - VM and container software"
 echo
 
 echo_step "Installing necessary packages"
@@ -194,19 +194,75 @@ echo_step "Setup ZSH"
 echo_substep "Install ZSH and set it as the default shell"
 install_packages "zsh"
 chsh -s "$(which zsh)" "$real_user"
-
- echo_substep "Install powerlevel10k and plugins"
- if ! [ -e "$user_home/.zsh/powerlevel10k" ]; then
-     runuser -u "$real_user" -- bash -c "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $user_home/.zsh/powerlevel10k"
- fi
- powerlevelSource="source $user_home/.zsh/powerlevel10k/powerlevel10k.zsh-theme"
- if !  grep -q -F "$powerlevelSource" "$user_home/.zshrc"; then
-     runuser -u "$real_user" -- bash -c "echo $powerlevelSource >>$user_home/.zshrc"
- fi
- if ! [ -e "$user_home/.zsh/zsh-autosuggestions" ]; then
+echo_substep "Install powerlevel10k and plugins"
+if ! [ -e "$user_home/.zsh/powerlevel10k" ]; then
+    runuser -u "$real_user" -- bash -c "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $user_home/.zsh/powerlevel10k"
+fi
+powerlevelSource="source $user_home/.zsh/powerlevel10k/powerlevel10k.zsh-theme"
+if !  grep -q -F "$powerlevelSource" "$user_home/.zshrc"; then
+    runuser -u "$real_user" -- bash -c "echo $powerlevelSource >>~/.zshrc"
+fi
+if ! [ -e "$user_home/.zsh/zsh-autosuggestions" ]; then
      runuser -u "$real_user" -- bash -c "git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions $user_home/.zsh/zsh-autosuggestions"
- fi
- suggestionsSource="source $user_home/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
- if ! grep -q -F "$suggestionsSource" "$user_home/.zshrc"; then
-     runuser -u "$real_user" -- bash -c "echo $suggestionsSource >>$user_home/.zshrc"
- fi
+fi
+suggestionsSource="source $user_home/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
+if ! grep -q -F "$suggestionsSource" "$user_home/.zshrc"; then
+    runuser -u "$real_user" -- bash -c "echo $suggestionsSource >>~/.zshrc"
+fi
+echo_substep "Setup history and fix ZLE keybinds"
+runuser -u "$real_user" -- bash -c "echo -e 'HISTFILE=~/.zsh_history\nHISTSIZE=10000\nSAVEHIST=10000' >>~/.zshrc"
+if ! grep -q -F 'zle-keybindings' "$user_home/.zshrc"; then
+    runuser -u "$real_user" -- bash -c 'cat >> ~/.zshrc' <<'EOF'
+# zle-keybindings
+typeset -g -A key
+
+key[Home]="${terminfo[khome]}"
+key[End]="${terminfo[kend]}"
+key[Insert]="${terminfo[kich1]}"
+key[Backspace]="${terminfo[kbs]}"
+key[Delete]="${terminfo[kdch1]}"
+key[Up]="${terminfo[kcuu1]}"
+key[Down]="${terminfo[kcud1]}"
+key[Left]="${terminfo[kcub1]}"
+key[Right]="${terminfo[kcuf1]}"
+key[PageUp]="${terminfo[kpp]}"
+key[PageDown]="${terminfo[knp]}"
+key[Shift-Tab]="${terminfo[kcbt]}"
+
+[[ -n "${key[Home]}"      ]] && bindkey -- "${key[Home]}"       beginning-of-line
+[[ -n "${key[End]}"       ]] && bindkey -- "${key[End]}"        end-of-line
+[[ -n "${key[Insert]}"    ]] && bindkey -- "${key[Insert]}"     overwrite-mode
+[[ -n "${key[Backspace]}" ]] && bindkey -- "${key[Backspace]}"  backward-delete-char
+[[ -n "${key[Delete]}"    ]] && bindkey -- "${key[Delete]}"     delete-char
+[[ -n "${key[Up]}"        ]] && bindkey -- "${key[Up]}"         up-line-or-history
+[[ -n "${key[Down]}"      ]] && bindkey -- "${key[Down]}"       down-line-or-history
+[[ -n "${key[Left]}"      ]] && bindkey -- "${key[Left]}"       backward-char
+[[ -n "${key[Right]}"     ]] && bindkey -- "${key[Right]}"      forward-char
+[[ -n "${key[PageUp]}"    ]] && bindkey -- "${key[PageUp]}"     beginning-of-buffer-or-history
+[[ -n "${key[PageDown]}"  ]] && bindkey -- "${key[PageDown]}"   end-of-buffer-or-history
+[[ -n "${key[Shift-Tab]}" ]] && bindkey -- "${key[Shift-Tab]}"  reverse-menu-complete
+
+if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
+    autoload -Uz add-zle-hook-widget
+    function zle_application_mode_start { echoti smkx }
+    function zle_application_mode_stop { echoti rmkx }
+    add-zle-hook-widget -Uz zle-line-init zle_application_mode_start
+    add-zle-hook-widget -Uz zle-line-finish zle_application_mode_stop
+fi'
+EOF
+fi
+
+echo_step "Flatpak"
+echo_substep "Flatpak Support"
+install_packages "flatpak"
+echo_substep "Install Flatpak applications"
+runuser -u "$real_user" -- flatpak install -y flathub \
+    io.github.kolunmi.Bazaar \
+    com.usebottles.bottles \
+    me.timschneeberger.jdsp4linux \
+    md.obsidian.Obsidian \
+    org.gnome.Builder \
+    org.qbittorrent.qBittorrent
+
+#echo_step "Install VM and container software"
+#install_packages "qemu-desktop virt-manager dnsmasq swtpm"
