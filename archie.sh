@@ -135,6 +135,8 @@ install_gnome_extension() {
     runuser -u ${real_user} -- pipx run gnome-extensions-cli install appindicatorsupport@rgcjonas.gmail.com
     echo "Installing Color Picker"
     runuser -u ${real_user} -- pipx run gnome-extensions-cli install color-picker@tuberry
+    local pipx=("python-pipx")
+    remove_packages ${pipx[@]}
 }
 
 # Banner
