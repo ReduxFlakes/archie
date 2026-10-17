@@ -22,8 +22,9 @@ increment_substep() {
     CURRENT_SUBSTEP=$((CURRENT_SUBSTEP+1))
 }
 
-if [ $SUDO_USER ]; then
+if [ "$SUDO_USER" ]; then
     real_user=$SUDO_USER
+user_home=/home/"$real_user"
 else
     real_user=$(whoami)
 fi
@@ -32,7 +33,7 @@ fi
 
 echo_error () {
     echo -e "${RED}error:${NOCOLOR} $1" >&2
-    exit $2
+    exit "$2"
 }
 
 echo_step () {
@@ -65,13 +66,11 @@ echo_finish_step() {
 }
 
 install_packages () {
-    pacman -S --color always --noconfirm $1
+    pacman -S --color always --noconfirm "$1"
     if [ $? -eq 0 ]; then
-        echo
-        echo -e "${LIGHTGREEN}[install_packages] sucesfully installed $1${NOCOLOR}"
+                echo -e "${LIGHTGREEN}[install_packages] sucesfully installed $1${NOCOLOR}"
     else
-        echo
-        echo_error "failed to install '$1' with pacman. Do the packages exist?" $?
+                echo_error "[install_packages] failed to install '$1' with pacman. Do the packages exist?" $?
     fi
 }
 
@@ -95,48 +94,46 @@ remove_packages() {
     local failRemove=0
 
     if [ "$packagesToRemove" != "" ]; then
-        failRemove=$((pacman -Rcns --noconfirm --color always $packagesToRemove) 2>&1)
+        failRemove=$( (pacman -Rcns --noconfirm --color always "$packagesToRemove") 2>&1)
     else 
-        echo
-        echo -e "${LIGHTGREEN}[remove_packages] packages declared for removal are not installed, skipping...${NOCOLOR}"
+                echo -e "${LIGHTGREEN}[remove_packages] packages declared for removal are not installed, skipping...${NOCOLOR}"
         return 0
     fi
-    if [ $failRemove -eq 0 ]; then
-        echo
-        echo -e "${LIGHTGREEN}[remove_packages] sucesfully removed $packagesToRemove ${NOCOLOR}"
+    if [ "$failRemove" -eq 0 ]; then
+                echo -e "${LIGHTGREEN}[remove_packages] sucesfully removed $packagesToRemove ${NOCOLOR}"
     else
-        echo
-        echo_error "failed to remove '$packagesToRemove' with pacman", $?
+                echo_error "[remove_packages] failed to remove '$packagesToRemove' with pacman" $?
     fi
 }
 
 gnome_tweaks() {
-    local ruser_uid=$(id -u ${real_user})
+    local ruser_uid
+ruser_uid=$(id -u "${real_user}")
     echo "Set display scaling to 100%"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface text-scaling-factor 1.0
-    if [ -e "/home/$real_user/.config/monitors.xml" ]; then
+    sudo -u "${real_user}" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface text-scaling-factor 1.0
+    if [ -e "$user_home/.config/monitors.xml" ]; then
         echo "Copy monitors.xml to xdg (for GDM display scaling)"
-        cp /home/$real_user/.config/monitors.xml /etc/xdg/monitors.xml
+        cp "$user_home"/.config/monitors.xml /etc/xdg/monitors.xml
     else
         echo "monitors.xml doesn't exist, skipping setting display scale for GDM"
     fi
     echo "Reduce volume step scale to 2"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.settings-daemon.plugins.media-keys volume-step 2
+    sudo -u "${real_user}" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.settings-daemon.plugins.media-keys volume-step 2
     echo "Enable minimize button on windows"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,close'
+    sudo -u "${real_user}" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,close'
     echo "Set color scheme to dark"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+    sudo -u "${real_user}" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
     echo "Enable log out option"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.shell always-show-log-out true
+    sudo -u "${real_user}" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.shell always-show-log-out true
 }
 
 install_gnome_extension() {
     echo "Installing AppIndicator support"
-    runuser -u ${real_user} -- pipx run gnome-extensions-cli install appindicatorsupport@rgcjonas.gmail.com
+    runuser -u "${real_user}" -- pipx run gnome-extensions-cli install appindicatorsupport@rgcjonas.gmail.com
     echo "Installing Color Picker"
-    runuser -u ${real_user} -- pipx run gnome-extensions-cli install color-picker@tuberry
+    runuser -u "${real_user}" -- pipx run gnome-extensions-cli install color-picker@tuberry
     local pipx=("python-pipx")
-    remove_packages ${pipx[@]}
+    remove_packages "${pipx[@]}"
 }
 
 # Banner
@@ -150,14 +147,14 @@ echo "Welcome to ReduxFlakes's Archie script :3"
 echo
 
 # startChecks
-isArch=$([[ `cat /etc/os-release | grep 'ID'` =~ "arch" ]] && echo true || echo false)
+isArch=$([[ $(cat /etc/os-release | grep 'ID') =~ "arch" ]] && echo true || echo false)
 
-if ! [ $(id -u) = 0 ]; then
-    echo_error "The script needs to be run as root.", 1
+if ! [ "$(id -u)" = 0 ]; then
+    echo_error "Archie needs to be run as root." 1
 fi
 
 if [[ $isArch == false ]]; then
-    echo_error "Archie is only compatible with Arch Linux! Exiting...", 1
+    echo_error "Archie is only compatible with Arch Linux! Exiting..." 1
 fi
 # endChecks
 
@@ -167,7 +164,7 @@ echo
 echo -e "${LIGHTBLUE}Features${NOCOLOR}"
 echo "  - install required packages"
 echo "  - debloat GNOME, tweak it, and install extensions"
-# echo "  - set up preferred shell and it's configurations (zsh with powerlevel10k, history, and autocomplete)"
+echo "  - set up preferred shell and configure it"
 # echo -e "${LIGHTBLUE}Software${NOCOLOR}"
 # echo "  - VM (libvirt and qemu)"
 # echo "  - Containers (podman, toolbox, and distrobox)"
