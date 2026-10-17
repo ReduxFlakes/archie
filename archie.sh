@@ -24,7 +24,7 @@ increment_substep() {
 
 if [ "$SUDO_USER" ]; then
     real_user=$SUDO_USER
-user_home=/home/"$real_user"
+    user_home=/home/"$real_user"
 else
     real_user=$(whoami)
 fi
@@ -68,9 +68,9 @@ echo_finish_step() {
 install_packages () {
     pacman -S --color always --noconfirm "$1"
     if [ $? -eq 0 ]; then
-                echo -e "${LIGHTGREEN}[install_packages] sucesfully installed $1${NOCOLOR}"
+        echo -e "${LIGHTGREEN}[install_packages] sucesfully installed $1${NOCOLOR}"
     else
-                echo_error "[install_packages] failed to install '$1' with pacman. Do the packages exist?" $?
+        echo_error "[install_packages] failed to install '$1' with pacman. Do the packages exist?" $?
     fi
 }
 
@@ -96,19 +96,19 @@ remove_packages() {
     if [ "$packagesToRemove" != "" ]; then
         failRemove=$( (pacman -Rcns --noconfirm --color always "$packagesToRemove") 2>&1)
     else 
-                echo -e "${LIGHTGREEN}[remove_packages] packages declared for removal are not installed, skipping...${NOCOLOR}"
+        echo -e "${LIGHTGREEN}[remove_packages] packages declared for removal are not installed, skipping...${NOCOLOR}"
         return 0
     fi
     if [ "$failRemove" -eq 0 ]; then
-                echo -e "${LIGHTGREEN}[remove_packages] sucesfully removed $packagesToRemove ${NOCOLOR}"
+        echo -e "${LIGHTGREEN}[remove_packages] sucesfully removed $packagesToRemove ${NOCOLOR}"
     else
-                echo_error "[remove_packages] failed to remove '$packagesToRemove' with pacman" $?
+        echo_error "[remove_packages] failed to remove '$packagesToRemove' with pacman" $?
     fi
 }
 
 gnome_tweaks() {
     local ruser_uid
-ruser_uid=$(id -u "${real_user}")
+    ruser_uid=$(id -u "${real_user}")
     echo "Set display scaling to 100%"
     sudo -u "${real_user}" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface text-scaling-factor 1.0
     if [ -e "$user_home/.config/monitors.xml" ]; then
@@ -188,3 +188,25 @@ echo_finish_substep
 echo_substep "Installing extension"
 install_gnome_extension
 echo_finish_substep
+
+echo_step "Setup ZSH"
+
+echo_substep "Install ZSH and set it as the default shell"
+install_packages "zsh"
+chsh -s "$(which zsh)" "$real_user"
+
+ echo_substep "Install powerlevel10k and plugins"
+ if ! [ -e "$user_home/.zsh/powerlevel10k" ]; then
+     runuser -u "$real_user" -- bash -c "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $user_home/.zsh/powerlevel10k"
+ fi
+ powerlevelSource="source $user_home/.zsh/powerlevel10k/powerlevel10k.zsh-theme"
+ if !  grep -q -F "$powerlevelSource" "$user_home/.zshrc"; then
+     runuser -u "$real_user" -- bash -c "echo $powerlevelSource >>$user_home/.zshrc"
+ fi
+ if ! [ -e "$user_home/.zsh/zsh-autosuggestions" ]; then
+     runuser -u "$real_user" -- bash -c "git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions $user_home/.zsh/zsh-autosuggestions"
+ fi
+ suggestionsSource="source $user_home/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
+ if ! grep -q -F "$suggestionsSource" "$user_home/.zshrc"; then
+     runuser -u "$real_user" -- bash -c "echo $suggestionsSource >>$user_home/.zshrc"
+ fi
