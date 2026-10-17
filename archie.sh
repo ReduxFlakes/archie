@@ -37,23 +37,27 @@ echo_error () {
 
 echo_step () {
     CURRENT_STEP_TEXT=$1;
+    echo
     echo -e "${LIGHTPURPLE}[Step ${CURRENT_STEP}]${NOCOLOR} - $CURRENT_STEP_TEXT"
     echo 
 }
 
 echo_substep() {
     CURRENT_SUBSTEP_TEXT=$1;
+    echo
     echo -e "${LIGHTPURPLE}[Step ${CURRENT_STEP}.${CURRENT_SUBSTEP}]${NOCOLOR} - $CURRENT_SUBSTEP_TEXT"
     echo
 }
 
 echo_finish_substep() {
+    echo
     echo -e "${LIGHTGREEN}Step ${CURRENT_STEP}.${CURRENT_SUBSTEP} - $CURRENT_SUBSTEP_TEXT done!${NOCOLOR}"
     echo 
     CURRENT_SUBSTEP=$((CURRENT_SUBSTEP+1))
 }
 
 echo_finish_step() {
+    echo
     echo -e "${LIGHTGREEN}Step ${CURRENT_STEP} - ${CURRENT_STEP_TEXT} done!${NOCOLOR}"
     echo 
     CURRENT_STEP=$((CURRENT_STEP+1))
@@ -65,7 +69,6 @@ install_packages () {
     if [ $? -eq 0 ]; then
         echo
         echo -e "${LIGHTGREEN}[install_packages] sucesfully installed $1${NOCOLOR}"
-        echo
     else
         echo
         echo_error "failed to install '$1' with pacman. Are they installed?" $?
@@ -96,13 +99,11 @@ remove_packages() {
     else 
         echo
         echo -e "${LIGHTGREEN}[remove_packages] packages declared for removal are not installed, skipping...${NOCOLOR}"
-        echo
         return 0
     fi
     if [ $failRemove -eq 0 ]; then
         echo
         echo -e "${LIGHTGREEN}[remove_packages] sucesfully removed $packagesToRemove ${NOCOLOR}"
-        echo
     else
         echo
         echo_error "failed to remove '$packagesToRemove' with pacman", $?
@@ -126,7 +127,6 @@ gnome_tweaks() {
     else
         echo "monitors.xml doesn't exist, skipping setting display scale for GDM"
     fi
-    echo
 }
 
 install_gnome_extension() {
@@ -134,7 +134,6 @@ install_gnome_extension() {
     runuser -u ${real_user} -- pipx run gnome-extensions-cli install appindicatorsupport@rgcjonas.gmail.com
     echo "Installing Color Picker"
     runuser -u ${real_user} -- pipx run gnome-extensions-cli install color-picker@tuberry
-    echo
 }
 
 # Banner
