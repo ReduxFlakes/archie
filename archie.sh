@@ -114,18 +114,20 @@ gnome_tweaks() {
     local ruser_uid=$(id -u ${real_user})
     echo "Set display scaling to 100%"
     sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface text-scaling-factor 1.0
-    echo "Reduce volume step scale to 2"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.settings-daemon.plugins.media-keys volume-step 2
-    echo "Enable minimize button on windows"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,close'
-    echo "Set color scheme to dark"
-    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
     if [ -e "/home/$real_user/.config/monitors.xml" ]; then
         echo "Copy monitors.xml to xdg (for GDM display scaling)"
         cp /home/$real_user/.config/monitors.xml /etc/xdg/monitors.xml
     else
         echo "monitors.xml doesn't exist, skipping setting display scale for GDM"
     fi
+    echo "Reduce volume step scale to 2"
+    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.settings-daemon.plugins.media-keys volume-step 2
+    echo "Enable minimize button on windows"
+    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,close'
+    echo "Set color scheme to dark"
+    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+    echo "Enable log out option"
+    sudo -u ${real_user} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${ruser_uid}/bus" gsettings set org.gnome.shell always-show-log-out true
 }
 
 install_gnome_extension() {
