@@ -149,13 +149,14 @@ echo
 # startChecks
 isArch=$([[ $(cat /etc/os-release | grep 'ID') =~ "arch" ]] && echo true || echo false)
 
+if [[ $isArch == false ]]; then
+    echo_error "Archie is only compatible with Arch Linux! Exiting..." 1
+fi
+
 if ! [ "$(id -u)" = 0 ]; then
     echo_error "Archie needs to be run as root." 1
 fi
 
-if [[ $isArch == false ]]; then
-    echo_error "Archie is only compatible with Arch Linux! Exiting..." 1
-fi
 # endChecks
 
 echo -e "${LIGHTBLUE}--- About ---${NOCOLOR}"
