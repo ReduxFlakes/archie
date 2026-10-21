@@ -263,7 +263,15 @@ runuser -u "$real_user" -- flatpak install -y flathub \
     me.timschneeberger.jdsp4linux \
     md.obsidian.Obsidian \
     org.gnome.Builder \
-    org.qbittorrent.qBittorrent
+    org.qbittorrent.qBittorrent \
+    com.github.tchx84.Flatseal \
+    com.protonvpn.www \
+    com.stremio.Stremio \
+    com.vysp3r.ProtonPlus \
+    io.github.sugarycandybar.Crucible \
+    org.gnome.Boxes \
+    page.tesk.Refine \
+    org.telegram.desktop \
 
 #echo_step "Install VM and container software"
 #install_packages "qemu-desktop virt-manager dnsmasq swtpm"
