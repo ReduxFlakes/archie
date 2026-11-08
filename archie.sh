@@ -260,6 +260,7 @@ if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
 fi'
 EOF
 fi
+echo_finish_step
 
 echo_step "Flatpak"
 echo_substep "Flatpak Support"
