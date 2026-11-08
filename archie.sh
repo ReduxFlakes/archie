@@ -177,6 +177,9 @@ echo_finish_step
 
 echo_step "Setup GNOME"
 
+isGnomeInstalled=$XDG_CURRENT_DESKTOP 
+
+if [[ $isGnomeInstalled == *"GNOME"* ]]; then
 echo_substep "Removing bloat"
 gnomeBloat=("decibels" "gnome-calendar" "gnome-console" "gnome-contacts" "gnome-maps" "gnome-music" "gnome-software" "gnome-system-monitor" "gnome-tour" "gnome-weather" "orca" "showtime" "simple-scan")
 remove_packages ${gnomeBloat[@]}
@@ -189,6 +192,11 @@ echo_finish_substep
 echo_substep "Installing extension"
 install_gnome_extension
 echo_finish_substep
+else
+    echo -e "${RED}The current desktop environment is not GNOME, skipping step...${NOCOLOR}"
+fi
+
+echo_finish_step
 
 echo_step "Setup ZSH"
 
