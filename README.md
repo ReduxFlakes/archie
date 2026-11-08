@@ -19,5 +19,6 @@ This is a work in progress script, a lot of my setup is still not covered by arc
 
 - [Performance tweaks](https://github.com/ReduxFlakes/redux-arch-settings)
 - Setup btrfs snapshots with hooks
+- Configure git
 - Add my custom Tuned profiles
 - Install pro audio packages
