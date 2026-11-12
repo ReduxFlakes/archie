@@ -288,5 +288,12 @@ runuser -u "$real_user" -- flatpak install -y flathub \
 echo_step "Virtualization and container software"
 echo_substep "Installing libvirt and qemu"
 install_packages "libvirt qemu-desktop virt-manager dnsmasq swtpm"
+echo_substep "Setup libvirt"
+echo 'firewall_backend = "iptables"' | tee -a /etc/libvirt/network.conf
+usermod -aG libvirt $SUDO_USER
+systemctl enable --now libvirtd.service
+systemctl enable --now libvirtd.socket
+virsh net-autostart default
+ufw route allow from 192.168.122.0/24
 echo_substep "Installing podman and distrobox"
 install_packages "podman distrobox"
