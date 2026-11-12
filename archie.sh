@@ -171,6 +171,9 @@ echo "  - Flatpak support and applications"
 # echo "  - VM and container software"
 echo
 
+echo "Synchronizing pacman database before proceeding..."
+yes n | pacman -Syu
+
 echo_step "Installing necessary packages"
 install_packages "base-devel vim git wget rsync curl python python-pipx"
 echo_finish_step
