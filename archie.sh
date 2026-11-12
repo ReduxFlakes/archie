@@ -282,5 +282,8 @@ runuser -u "$real_user" -- flatpak install -y flathub \
     page.tesk.Refine \
     org.telegram.desktop \
 
-#echo_step "Install VM and container software"
-#install_packages "qemu-desktop virt-manager dnsmasq swtpm"
+echo_step "Virtualization and container software"
+echo_substep "Installing libvirt and qemu"
+install_packages "libvirt qemu-desktop virt-manager dnsmasq swtpm"
+echo_substep "Installing podman and distrobox"
+install_packages "podman distrobox"
