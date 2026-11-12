@@ -4,12 +4,14 @@ My Arch Linux setup script
 
 ![Archie script running](print.png)
 
-## Features
+## What does it do
 
-- Install essential packages, like text editor, utilities, git, and more
+- Install essential packages (text editor, utilities, git, and more)
 - Setup GNOME by removing unused apps, change gsettings, and install some extensions
 - Install and configure ZSH
-- Install my required software (including Flatpak applications)
+- Install required software:
+  - Flatpak applications
+  - virtualization and container software
 
 ## Roadmap
 
